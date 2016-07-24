@@ -14,5 +14,4 @@ WORKDIR /docker/kallisto/build
 RUN cmake .. && \
 	make && \
 	make install
-Volume ["/home/jake/rna_data/"]
 ENTRYPOINT ["kallisto"]

@@ -4,9 +4,9 @@ import os
 
 
 class globalConfig(luigi.Config):
-    exp_name = luigi.Parameter(default='test')
-    mnt_point = luigi.Parameter(default='/home/jake/rna_data')
-    fastq_dict = luigi.DictParameter(default={'test': 1})
+    exp_name = luigi.Parameter()
+    mnt_point = luigi.Parameter()
+    fastq_dict = luigi.DictParameter()
 
 
 class kallisto_index(luigi.Task):

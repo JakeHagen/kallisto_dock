@@ -54,7 +54,8 @@ def print_config_with_fastqs(fastq_class):
             print('[globalConfig]', file=f)
             print('exp_name:', file=f)
             print('#mnt_point:', file=f)
-            print('fastq_dict:', json.dumps(fastq_class.sample_fastq_dict), file=f)
+            print('fastq_dict:',
+                  json.dumps(fastq_class.sample_fastq_dict), file=f)
             print('', file=f)
             print('[kallisto_index]', file=f)
             print('#transcript_fa:', file=f)
