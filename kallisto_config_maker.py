@@ -60,7 +60,7 @@ def print_config_with_fastqs(fastq_class):
             print('[kallisto_index]', file=f)
             print('#transcript_fa:', file=f)
             print('[kallisto_quant]', file=f)
-            print('paired:', fastq_class.paired_end, file=f)
+            print('paired_end:', fastq_class.paired_end, file=f)
 
 
 def main():
