@@ -1,0 +1,5 @@
+install.packages("optparse", repos="https://cran.rstudio.com/")
+install.packages("readr", repos="https://cran.rstudio.com/")
+source("https://bioconductor.org/biocLite.R")
+biocLite()
+biocLite(c("DESeq2", "tximport"))

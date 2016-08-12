@@ -2,6 +2,7 @@ library("optparse")
 library("tximport")
 library("readr")
 library("DESeq2")
+library("jsonlite")
 
 option_list <- list(
   make_option(c("-m", "--meta"), action="store", type="character", default=NULL,
@@ -10,26 +11,30 @@ option_list <- list(
                help="contrast matrix for experiment in csv format"),
   make_option(c("-o", "--output"), action="store", type="character",
                help="folder to output results"),
-  make_option(c("-t", "--transcriptCounts"), action="store", type="character",
-               help="transcript counts file for differential expression, should be space between file names,
-               should be tvs format")
-)
+  make_option(c("-d", "--transcriptDir"), action="store", type="character",
+               help="directory that contains the kallisto output")
+               )
 
 opt = parse_args(OptionParser(option_list=option_list))
 
-# metaData <- read.csv(opt$meta)
-metaData <- data.frame(condition=c('control', 'control', 'control',
-                                  'mars2', 'mars2', 'mars2'))
-rownames(metaData) <- list.files("/home/jake/rna_data/mars2_gastroc_kallisto/")
+metaData <- fromJSON(opt$meta)
+#read.csv(opt$meta)
+#rownames(preMetaData) <- preMetaData[,1]
+#print(metaData)
+#rownames(metaData) <- metaData[,1]
+#print(metaData)
+#metaData <- DataFrame(metaData[,-1])
+# metaData <- data.frame(condition=c('control', 'control', 'control',
+#                                    'mars2', 'mars2', 'mars2'))
+print(metaData)
+# rownames(metaData) <- list.files("/home/jake/rna_data/mars2_gastroc/kallisto/")
 
 # contrast <- read.csv(opt$contrast)
 contrast <- c("condition", "mars2", "control")
 outputDir <- opt$output
-#transcriptDirs <- unlist(strsplit(opt$transcriptCounts, split=" "))
-transcriptDirs <- paste0("/home/jake/rna_data/mars2_gastroc_kallisto/",
-                         list.files("/home/jake/rna_data/mars2_gastroc_kallisto/"))
-transcriptFiles <- paste0(transcriptDirs, "/abundance.tsv")
-names(transcriptFiles) <- list.files("/home/jake/rna_data/mars2_gastroc_kallisto/")
+transcriptDir <- opt$transcriptDir
+transcriptFiles <- paste0(transcriptDir, list.files(transcriptDir), "/abundance.tsv")
+names(transcriptFiles) <- list.files(transcriptDir)
 
 tx_full <- read_tsv(transcriptFiles[1])
 tx_gene_names <- read.table(transcriptFiles[1], sep="|", skip=1)
@@ -44,13 +49,16 @@ dds <- dds[rowSums(counts(dds)) > 0,]
 dds <- DESeq(dds)
 res <- results(dds, contrast = contrast)
 res <- res[order(res$padj),]
- 
+
 des_full <- data.frame(res@rownames, res@listData)
 
-des_padj.05 <- subset(des_full, des_full$padj <= .05)
+des_padj05 <- subset(des_full, des_full$padj <= .05)
 
-dir.create(output)
-write.table(des_full, file = paste0(output, "/gene_full.csv"),
+dir.create(outputDir)
+
+write.table(des_padj05, file = paste0(outputDir, "/", contrast[2],
+                                       "_", contrast[3], "_", "gene_padj05.csv"),
             row.names = FALSE, sep = ",", quote = FALSE)
-write.table(des_padj.05, file = paste0(output, "/gene_padj.05.csv"),
+write.table(des_full, file = paste0(outputDir, "/", contrast[2],
+                                    "_", contrast[3], "_", "gene_full.csv"),
             row.names = FALSE, sep = ",", quote = FALSE)

@@ -51,12 +51,15 @@ class kallisto_quant(luigi.Task):
 
     def run(self):
         try:
-            os.makedirs('{data_store}/{exp_name}'.format(
+            os.makedirs('{data_store}/{exp_name}/kallisto'.format(
                 data_store=globalConfig().mnt_point,
                 exp_name=globalConfig().exp_name)
             )
         except OSError:
             pass
+
+        # remove abundance.tsv from output to create dir path for kallisto
+        output_dir = self.output().path.rsplit('/', 1)[0]
 
         if self.paired_end:
             docker_cmd = [
@@ -64,7 +67,7 @@ class kallisto_quant(luigi.Task):
                 '-v', host_to_docker_mnt,
                 'kallisto', 'quant',
                 '-i', self.input().path,
-                '-o', self.output().path,
+                '-o', output_dir,
                 ]
             docker_cmd += globalConfig().fastq_dict[self.sample]
 
@@ -74,7 +77,7 @@ class kallisto_quant(luigi.Task):
                 '-v', host_to_docker_mnt,
                 'kallisto', 'quant',
                 '-i', self.input().path,
-                '-o', self.output().path,
+                '-o', output_dir,
                 '--single', '-l', '200', '-s', '20',
                 ]
             docker_cmd += globalConfig().fastq_dict[self.sample]
@@ -83,7 +86,7 @@ class kallisto_quant(luigi.Task):
 
     def output(self):
         return luigi.LocalTarget(
-            '{data_store}/{exp_name}/{sample}'.format(
+            '{data_store}/{exp_name}/kallisto/{sample}/abundance.tsv'.format(
                 data_store=globalConfig().mnt_point,
                 exp_name=globalConfig().exp_name,
                 sample=self.sample)
@@ -109,7 +112,7 @@ class differential_expression(luigi.Task):
             '--contrast', self.contrast_matrix,
             '-o', self.de_dir
             ]
-        docker_cmd += self.input()
+        docker_cmd += self.input().path
 
         subprocess.call(docker_cmd)
 
